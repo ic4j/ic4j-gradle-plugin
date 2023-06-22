@@ -7,9 +7,11 @@ To install or uninstall an ICP canister, add the install Gradle plugin to your G
 
 run 
 ```gradle install ```
-to install
+to install canister
 
-or ```gradle uninstall``` to uninstall
+or ```gradle uninstall``` to uninstall canister
+
+or ```gradle call``` to call canister
 
 ```
 plugins {
