@@ -35,6 +35,21 @@ public class Canister {
      * 
      */		
 	String canisterId;
+	
+	
+	/**
+	 *  Specifies the method name to call on the canister.
+	 */
+	String method;	
+	
+	org.ic4j.candid.types.Mode methodType;	
+	
+	/**
+	 * Provide the .did file with which to decode the response.  
+	 */
+	String candid;
+	
+	boolean loadIDL = false;
 
     /**
      * Specifies if the canister is deleted in uninstall task.
@@ -65,12 +80,17 @@ public class Canister {
 	 */	
 	String argument;
 	
+	Integer timeout = 60;
+	
+	Integer sleep = 5;	
+	
 	/**
 	 * Specifies the data type for the argument when making the call using an argument
      *      
      * [possible values: idl, raw]
 	 */
 	IDLArgType argumentType = IDLArgType.idl;	
+
 	
     public Canister(String name) {
         this.name = name;

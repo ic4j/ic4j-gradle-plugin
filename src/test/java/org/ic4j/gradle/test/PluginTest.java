@@ -16,6 +16,7 @@ public class PluginTest {
 	 
 	    assert(project.getTasks().getByName("install") != null);
 	    assert(project.getTasks().getByName("uninstall") != null);
+	    assert(project.getTasks().getByName("call") != null);
 	}	
 
 }

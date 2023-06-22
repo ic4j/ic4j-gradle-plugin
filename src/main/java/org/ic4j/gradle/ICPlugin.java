@@ -26,6 +26,7 @@ public class ICPlugin implements Plugin<Project>{
 		
 	    project.getTasks().create("install", Install.class);
 	    project.getTasks().create("uninstall", Uninstall.class);
+	    project.getTasks().create("call", Call.class);	    
 		
 	}
 	

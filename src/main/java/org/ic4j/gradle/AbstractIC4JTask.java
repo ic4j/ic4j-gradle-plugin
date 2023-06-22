@@ -43,8 +43,12 @@ abstract class AbstractIC4JTask extends DefaultTask {
 	@Input
 	String identity;
 	
+	String identityType;
+	
 	@Input
 	String network = DEFAULT_NETWORK;
+	
+	boolean isLocal = false;
 	
 	
 	@Input
@@ -71,7 +75,9 @@ abstract class AbstractIC4JTask extends DefaultTask {
 		Agent agent = new AgentBuilder().transport(transport)
 				.identity(identity)
 				.build();
-		agent.fetchRootKey();
+		
+		if(this.isLocal)
+			agent.fetchRootKey();
 
 		ManagementService managementService = ManagementService.create(agent, Principal.managementCanister(),effectiveCanister);
 		

@@ -19,7 +19,8 @@ plugins {
 
 install {
 		network = 'http://localhost:4943/'
-		identity = 'identity.pem'		
+		identity = '/Users/roman/.config/dfx/identity/default/identity.pem'	
+		isLocal = true			
 		
 		canisters{
 			canister1
@@ -28,21 +29,47 @@ install {
 		        wasmFile ='hello.wasm'
 		        argument='("from Gradle")'
 			}
-		}	
+		}
+	
 }
 
 uninstall {
 
 		network = 'http://localhost:4943/'
-		identity = 'identity.pem'		
+		identity = '/Users/roman/.config/dfx/identity/default/identity.pem'	
+		isLocal = true			
 		
 		canisters{
 			canister1
 			{
-		        canisterId = 'udtxk-viaaa-aaaaa-aaa6a-cai'
-		        delete = 'false'
+		        canisterId = 'yahli-baaaa-aaaaa-aabtq-cai'
+		        delete = 'true'
 			}
-		}	
+		}
+	
+}
+
+call {
+
+		network = 'http://localhost:4943/'
+		identity = '/Users/roman/.config/dfx/identity/default/identity.pem'		
+		isLocal = true
+		
+		canisters{
+			canister1
+			{
+		        canisterId = 'yhgn4-myaaa-aaaaa-aabta-cai'
+		        method ='greet'
+		        argument='("Gradle")'
+			}
+			
+			canister2
+			{
+		        canisterId = 'yhgn4-myaaa-aaaaa-aabta-cai'
+		        method ='peek'
+		        methodType='QUERY'
+			}			
+		}
 }
 ```
 
