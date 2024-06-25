@@ -1,4 +1,4 @@
-# IC4J Gradle Plugin
+dccg7-xmaaa-aaaaa-qaamq-cai# IC4J Gradle Plugin
 
 
 The IC4J Gradle Plugin allows for the installation and uninstallation of ICP canisters from Gradle scripts.
@@ -44,7 +44,7 @@ uninstall {
 		canisters{
 			canister1
 			{
-		        canisterId = 'yahli-baaaa-aaaaa-aabtq-cai'
+		        canisterId = 'dccg7-xmaaa-aaaaa-qaamq-cai'
 		        delete = 'true'
 			}
 		}
@@ -60,14 +60,14 @@ call {
 		canisters{
 			canister1
 			{
-		        canisterId = 'yhgn4-myaaa-aaaaa-aabta-cai'
+		        canisterId = 'dccg7-xmaaa-aaaaa-qaamq-cai'
 		        method ='greet'
 		        argument='("Gradle")'
 			}
 			
 			canister2
 			{
-		        canisterId = 'yhgn4-myaaa-aaaaa-aabta-cai'
+		        canisterId = 'dccg7-xmaaa-aaaaa-qaamq-cai'
 		        method ='peek'
 		        methodType='QUERY'
 			}			
