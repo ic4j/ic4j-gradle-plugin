@@ -82,12 +82,18 @@ IC4J_CI_FIXTURE="$(dfx canister id fixture --network local)"
 # Retry only artifact resolution in the harmless configuration preflight.
 run_gradle consumer-config -p "$work/consumer" tasks
 # Do not retry mutating lifecycle operations.
-for task in install call uninstall; do
-    timeout 180s gradle --no-daemon --console=plain -p "$work/consumer" "$task" --info 2>&1 | tee "$reports/$task.log"
-done
+consumer_task() {
+    local label="$1"
+    shift
+    timeout 180s gradle --no-daemon --console=plain -p "$work/consumer" "$@" --info 2>&1 | tee "$reports/$label.log"
+}
+consumer_task install install
 grep -Fq "Canister $IC4J_CI_FIXTURE is running" "$reports/install.log"
-grep -Fq 'arg0=Hello, Gradle CI!' "$reports/call.log"
-grep -Fxq 'arg0=Gradle CI' "$reports/call.log"
+consumer_task update call -PciCall=update
+grep -Fxq 'arg0=Hello, Gradle CI!' "$reports/update.log"
+consumer_task query call -PciCall=query
+grep -Fxq 'arg0=Gradle CI' "$reports/query.log"
+consumer_task uninstall uninstall
 grep -Fq "Canister $IC4J_CI_FIXTURE deleted" "$reports/uninstall.log"
 if dfx canister status "$IC4J_CI_FIXTURE" --network local --identity ci-smoke >"$reports/deleted-status.log" 2>&1; then
     echo "Canister still exists after uninstall"; exit 1
