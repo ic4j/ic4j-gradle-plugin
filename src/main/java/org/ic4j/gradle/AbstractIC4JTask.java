@@ -16,7 +16,7 @@
 
 package org.ic4j.gradle;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.FileReader;
 import java.io.Reader;
 import java.net.URISyntaxException;
@@ -36,7 +36,7 @@ import org.ic4j.management.ManagementService;
 import org.ic4j.types.Principal;
 
 abstract class AbstractIC4JTask extends DefaultTask {
-	static final Principal effectiveCanister = Principal.fromString("x5pps-pqaaa-aaaab-qadbq-cai");
+	static final Principal legacyCreationRoute = Principal.fromString("x5pps-pqaaa-aaaab-qadbq-cai");
 	
 	static final String DEFAULT_NETWORK = "http://localhost:4943/";
 	
@@ -64,25 +64,26 @@ abstract class AbstractIC4JTask extends DefaultTask {
     }
     
     @Internal
-	protected ManagementService getManagementService() throws FileNotFoundException, URISyntaxException {
+	protected Agent openManagementAgent() throws IOException, URISyntaxException {
 		
-		Reader sourceReader = new FileReader(this.identity);
-		
-		Identity identity = Secp256k1Identity.fromPEMFile(sourceReader);
+        Identity configuredIdentity;
+        try (Reader sourceReader = new FileReader(this.identity)) {
+            configuredIdentity = Secp256k1Identity.fromPEMFile(sourceReader);
+        }
+        ReplicaTransport transport = ReplicaOkHttpTransport.create(this.network);
+        Agent agent = new AgentBuilder().transport(transport).identity(configuredIdentity).build();
+        try {
+            if (this.isLocal) {
+                agent.fetchRootKey();
+            }
+            return agent;
+        } catch (RuntimeException | Error e) {
+            agent.close();
+            throw e;
+        }
+    }
 
-
-		ReplicaTransport transport = ReplicaOkHttpTransport.create(this.network);
-		Agent agent = new AgentBuilder().transport(transport)
-				.identity(identity)
-				.build();
-		
-		if(this.isLocal)
-			agent.fetchRootKey();
-
-		ManagementService managementService = ManagementService.create(agent, Principal.managementCanister(),effectiveCanister);
-		
-		return managementService;
-	
-
-}   
+    protected ManagementService managementService(Agent agent, Principal effectiveCanister) {
+        return ManagementService.create(agent, Principal.managementCanister(), effectiveCanister);
+    }
 }

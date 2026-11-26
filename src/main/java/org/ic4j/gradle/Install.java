@@ -19,7 +19,6 @@ package org.ic4j.gradle;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Security;
 import java.util.Optional;
 
@@ -27,6 +26,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.GradleException;
+import org.ic4j.agent.Agent;
 import org.ic4j.agent.AgentError;
 import org.ic4j.candid.parser.IDLArgs;
 import org.ic4j.management.CanisterStatusResponse;
@@ -47,8 +47,9 @@ public class Install extends AbstractIC4JTask {
 		if(this.canisters == null || this.canisters.isEmpty())
 			throw new GradleException("Undefined canister deployments"); 	          
       
+		Agent agent = null;
 		try {
-		ManagementService managementService = this.getManagementService();
+		agent = this.openManagementAgent();
 		for(Canister deployment : this.canisters)
 		{	
 			String canisterId = deployment.canisterId;
@@ -56,7 +57,7 @@ public class Install extends AbstractIC4JTask {
 			if(canisterId == null)
 			{
 				Optional<BigInteger> amount = Optional.ofNullable(deployment.withCycles);
-				canister = managementService.provisionalCreateCanisterWithCycles(Optional.empty(), amount).get();
+				canister = managementService(agent, legacyCreationRoute).provisionalCreateCanisterWithCycles(Optional.empty(), amount).get();
 
 				this.getLogger().info("Created canister with ID " + canister.toString());
 				
@@ -65,7 +66,8 @@ public class Install extends AbstractIC4JTask {
 			else
 				canister = Principal.fromString(canisterId);
 			
-			Path path = Paths.get(deployment.wasmFile);
+			ManagementService managementService = managementService(agent, canister);
+			Path path = getProject().file(deployment.wasmFile).toPath();
 			
 			byte [] wasmModule = Files.readAllBytes(path);	
 			
@@ -97,12 +99,14 @@ public class Install extends AbstractIC4JTask {
 		}
 		catch (AgentError e) {
 			this.getLogger().error(e.getLocalizedMessage());
-			throw new GradleException(e.getLocalizedMessage());
+			throw new GradleException(e.getLocalizedMessage(), e);
 		}		
 		catch (Exception e) {
 			this.getLogger().error(e.getLocalizedMessage());
-			throw new GradleException(e.getLocalizedMessage());
-		}      
+			throw new GradleException(e.getLocalizedMessage(), e);
+		} finally {
+			if (agent != null) agent.close();
+		}
     }
 
 }
