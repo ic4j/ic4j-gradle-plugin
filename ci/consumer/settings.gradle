@@ -1,0 +1,11 @@
+pluginManagement {
+    repositories {
+        // Plugin marker, implementation and IC4J dependencies are built in this run.
+        exclusiveContent {
+            forRepository { maven { url = uri(System.getenv('IC4J_CI_MAVEN_REPO')) } }
+            filter { includeGroupByRegex('org\\.ic4j(\\..*)?') }
+        }
+        mavenCentral()
+    }
+}
+rootProject.name = 'ic4j-gradle-plugin-consumer'

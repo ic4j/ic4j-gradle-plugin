@@ -1,0 +1,59 @@
+plugins {
+    id 'org.ic4j.ic4j-gradle-plugin' version '0.8.5'
+}
+
+def fixtureId = providers.environmentVariable('IC4J_CI_FIXTURE').get()
+def pem = providers.environmentVariable('IC4J_CI_IDENTITY').get()
+def fixtureNetwork = 'http://127.0.0.1:4943/'
+def callMode = providers.gradleProperty('ciCall').getOrElse('query')
+if (!['update', 'query'].contains(callMode)) {
+    throw new GradleException('ciCall must be update or query')
+}
+
+install {
+    network = fixtureNetwork
+    identity = pem
+    isLocal = true
+    canisters {
+        fixture {
+            canisterId = fixtureId
+            mode = 'install'
+            wasmFile = 'hello.wasm'
+            argument = '("Initial")'
+        }
+    }
+}
+
+call {
+    network = fixtureNetwork
+    isLocal = true
+    canisters {
+        if (callMode == 'update') {
+            updateFixture {
+                canisterId = fixtureId
+                method = 'greet'
+                argument = '("Gradle CI")'
+                timeout = 30
+                sleep = 1
+            }
+        } else {
+            readFixture {
+                canisterId = fixtureId
+                method = 'peek'
+                methodType = 'QUERY'
+            }
+        }
+    }
+}
+
+uninstall {
+    network = fixtureNetwork
+    identity = pem
+    isLocal = true
+    canisters {
+        fixture {
+            canisterId = fixtureId
+            delete = true
+        }
+    }
+}

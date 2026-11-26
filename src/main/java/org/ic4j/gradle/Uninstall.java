@@ -21,6 +21,7 @@ import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.TaskAction;
+import org.ic4j.agent.Agent;
 import org.ic4j.agent.AgentError;
 import org.ic4j.management.CanisterStatusResponse;
 import org.ic4j.management.ManagementService;
@@ -42,8 +43,9 @@ public class Uninstall extends AbstractIC4JTask {
 		if (this.canisters == null || this.canisters.isEmpty())
 			throw new GradleException("Undefined canister deployments");
 
+		Agent agent = null;
 		try {
-			ManagementService managementService = this.getManagementService();
+			agent = this.openManagementAgent();
 			for (Canister deploymentCanister : this.canisters) {
 				String canisterId = deploymentCanister.canisterId;
 
@@ -51,6 +53,7 @@ public class Uninstall extends AbstractIC4JTask {
 					continue;
 
 				Principal canister = Principal.fromString(canisterId);
+				ManagementService managementService = managementService(agent, canister);
 
 				managementService.stopCanister(canister);
 
@@ -68,12 +71,13 @@ public class Uninstall extends AbstractIC4JTask {
 			}
 		} catch (AgentError e) {
 			this.getLogger().error(e.getLocalizedMessage());
-			throw new GradleException(e.getLocalizedMessage());
+			throw new GradleException(e.getLocalizedMessage(), e);
 		} catch (Exception e) {
 			this.getLogger().error(e.getLocalizedMessage());
-			throw new GradleException(e.getLocalizedMessage());
+			throw new GradleException(e.getLocalizedMessage(), e);
+		} finally {
+			if (agent != null) agent.close();
 		}
-		;
 	}
 
 }
